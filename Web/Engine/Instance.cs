@@ -299,6 +299,8 @@ namespace GitDeployHub.Web.Engine
             process.Start();
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
+
+            log.Log(string.Format("(waiting for process exit ...)"));
             var exited = process.WaitForExit((int)TimeSpan.FromMinutes(15).TotalMilliseconds);
             if (!exited)
             {
