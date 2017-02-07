@@ -321,8 +321,21 @@ namespace GitDeployHub.Web.Engine
             LastSmokeTest = null;
         }
 
+        private string GetHomePath()
+        {
+            string path = Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)).FullName;
+            if (Environment.OSVersion.Version.Major >= 6)
+            {
+                path = Directory.GetParent(path).ToString();
+            }
+
+            return path;
+        }
+
         public void Fetch(ILog log, bool fetchTags = true)
         {
+            log.Log(string.Format("path={0}", GetHomePath()));
+
             ExecuteProcess("git", "fetch", log);
             if (fetchTags)
             {
