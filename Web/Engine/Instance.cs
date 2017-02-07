@@ -8,11 +8,18 @@ using System.Text.RegularExpressions;
 using System.Web;
 using GitDeployHub.Web.Engine.Notifiers;
 using GitDeployHub.Web.Engine.Processes;
+using System.Threading;
 
 namespace GitDeployHub.Web.Engine
 {
     public class Instance
     {
+        private readonly StringBuilder _standardOutput = new StringBuilder();
+        private readonly StringBuilder _standardError = new StringBuilder();
+        private readonly AutoResetEvent _standardOutputWaitHandle = new AutoResetEvent(false);
+        private readonly AutoResetEvent _standardErrorWaitHandle = new AutoResetEvent(false);
+        private int _processExitCode = -1;
+
         public string Name { get; private set; }
 
         public string Folder { get; set; }
@@ -294,22 +301,71 @@ namespace GitDeployHub.Web.Engine
                 {
                     StartInfo = processStartInfo
                 };
-            process.OutputDataReceived += (sender, args) => log.Log(args.Data);
-            process.ErrorDataReceived += (sender, args) => log.Log(args.Data);
+            
+            //process.OutputDataReceived += (sender, args) => log.Log(args.Data);
+            //process.ErrorDataReceived += (sender, args) => log.Log(args.Data);
+            process.OutputDataReceived += process_OutputDataReceived;
+            process.ErrorDataReceived += process_ErrorDataReceived;
+
             process.Start();
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
 
             log.Log(string.Format("(waiting for process exit ...)"));
-            var exited = process.WaitForExit((int)TimeSpan.FromMinutes(15).TotalMilliseconds);
-            if (!exited)
-            {
-                throw new Exception(string.Format("{0} {1} timed out.", command, arguments));
-            }
+            //var exited = process.WaitForExit((int)TimeSpan.FromMinutes(15).TotalMilliseconds);
+            process.WaitForExit();
+
+            _standardErrorWaitHandle.WaitOne(1000);
+            _standardOutputWaitHandle.WaitOne(1000);
+            _processExitCode = process.ExitCode;
+
+            //if (!exited)
+            //{
+            //    throw new Exception(string.Format("{0} {1} timed out.", command, arguments));
+            //}
             if (process.ExitCode != 0)
             {
                 throw new Exception(string.Format("{0} {1} failed with exit code: {2}", command, arguments, process.ExitCode));
             }
+        }
+
+        private void process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            if (e.Data == null)
+            {
+                _standardErrorWaitHandle.Set();
+            }
+            else
+            {
+                _standardError.AppendLine(e.Data);
+            }
+        }
+
+        private void process_OutputDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            if (e.Data == null)
+            {
+                _standardOutputWaitHandle.Set();
+            }
+            else
+            {
+                _standardOutput.AppendLine(e.Data);
+            }
+        }
+
+        public bool CompletedWithSuccess()
+        {
+            return _processExitCode == 0;
+        }
+
+        public string GetStandardOutput()
+        {
+            return _standardOutput.ToString();
+        }
+
+        public string GetStandardError()
+        {
+            return _standardError.ToString();
         }
 
         private void FolderChanged()
