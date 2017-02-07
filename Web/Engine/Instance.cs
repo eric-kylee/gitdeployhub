@@ -323,12 +323,12 @@ namespace GitDeployHub.Web.Engine
 
         public void Fetch(ILog log, bool fetchTags = true)
         {
-            ExecuteProcess("git", "fetch", log);
-            if (fetchTags)
-            {
-                ExecuteProcess("git", "fetch --tags", log);
-            }
-            ExecuteProcess("git", "status -uno", log);
+            //ExecuteProcess("git", "fetch", log);
+            //if (fetchTags)
+            //{
+            //    ExecuteProcess("git", "fetch --tags", log);
+            //}
+            //ExecuteProcess("git", "status -uno", log);
             ExecuteProcess("git", "pull", log);
             FolderChanged();
         }
