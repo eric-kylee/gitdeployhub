@@ -294,8 +294,31 @@ namespace GitDeployHub.Web.Engine
                 {
                     StartInfo = processStartInfo
                 };
-            process.OutputDataReceived += (sender, args) => log.Log(args.Data);
-            process.ErrorDataReceived += (sender, args) => log.Log(args.Data);
+
+            //process.OutputDataReceived += (sender, args) => log.Log(args.Data);
+            //http://stackoverflow.com/questions/29972789/git-diff-gets-stuck-when-run-as-net-process
+            string outputData = string.Empty;
+            process.OutputDataReceived += new DataReceivedEventHandler((sender, e) =>
+            {
+                if (!String.IsNullOrEmpty(e.Data))
+                {
+                    //outputData += e.Data + Environment.NewLine;
+                    log.Log(e.Data);
+                }
+            });
+
+            //process.ErrorDataReceived += (sender, args) => log.Log(args.Data);
+            //http://stackoverflow.com/questions/29972789/git-diff-gets-stuck-when-run-as-net-process
+            string errorData = string.Empty;
+            process.ErrorDataReceived += new DataReceivedEventHandler((sender, e) =>
+            {
+                if (!String.IsNullOrEmpty(e.Data))
+                {
+                    //errorData += e.Data + Environment.NewLine;
+                    log.Log(e.Data);
+                }
+            });
+
             process.Start();
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
