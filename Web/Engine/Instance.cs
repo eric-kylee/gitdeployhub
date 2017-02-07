@@ -294,11 +294,11 @@ namespace GitDeployHub.Web.Engine
                 {
                     StartInfo = processStartInfo
                 };
-            process.OutputDataReceived += (sender, args) => log.Log(args.Data);
-            process.ErrorDataReceived += (sender, args) => log.Log(args.Data);
+            //process.OutputDataReceived += (sender, args) => log.Log(args.Data);
+            //process.ErrorDataReceived += (sender, args) => log.Log(args.Data);
             process.Start();
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
+            //process.BeginOutputReadLine();
+            //process.BeginErrorReadLine();
 
             log.Log(string.Format("(waiting for process exit ...)"));
             var exited = process.WaitForExit((int)TimeSpan.FromMinutes(15).TotalMilliseconds);
