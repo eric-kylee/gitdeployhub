@@ -290,6 +290,21 @@ namespace GitDeployHub.Web.Engine
                 processStartInfo.Arguments = arguments;
             }
 
+            // windows user info
+            //-------------------------------------------
+            processStartInfo.Domain = "hsit.co.kr";
+            processStartInfo.UserName = "prolky";
+
+            System.Security.SecureString ssPwd = new System.Security.SecureString();
+            string password = "eor1iryw)@!)";
+            for (int i = 0; i < password.Length; i++)
+            {
+                ssPwd.AppendChar(password[i]);
+            }
+            password = "";
+            processStartInfo.Password = ssPwd;
+            //-------------------------------------------
+
             var process = new System.Diagnostics.Process
                 {
                     StartInfo = processStartInfo
