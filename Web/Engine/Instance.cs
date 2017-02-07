@@ -327,6 +327,7 @@ namespace GitDeployHub.Web.Engine
                 ExecuteProcess("git", "fetch --tags", log);
             }
             ExecuteProcess("git", "status -uno", log);
+            ExecuteProcess("git", "pull", log);
             FolderChanged();
         }
 
